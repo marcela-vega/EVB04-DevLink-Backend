@@ -1,6 +1,6 @@
 # DevLink Backend — Hito 1
 
-Spring Boot + PostgreSQL backend for the Hito 1 MVP.
+Spring Boot + PostgreSQL backend for the Spring 1 MVP.
 
 ## Included Hito 1 stories
 - HU01 Register developer
