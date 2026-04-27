@@ -6,15 +6,15 @@ services:
     container_name: devlink_app
     restart: always
     ports:
-      - "${SERVER_PORT:8080}:8080"
+      - "${SERVER_PORT:-8080}:8080"
     environment:
       DB_URL: ${DB_URL}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
-      JPA_DDL_AUTO: ${JPA_DDL_AUTO:validate}
+      JPA_DDL_AUTO: ${JPA_DDL_AUTO:-validate}
       SERVER_PORT: 8080
       JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:86400000}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
     depends_on:
       - postgres
 
