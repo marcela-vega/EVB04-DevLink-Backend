@@ -4,6 +4,7 @@ import com.DevLink.backend.dto.*;
 import com.DevLink.backend.entity.Application;
 import com.DevLink.backend.entity.Project;
 import com.DevLink.backend.entity.User;
+import com.DevLink.backend.entity.enums.ApplicationStatus;
 import com.DevLink.backend.entity.enums.NotificationType;
 import com.DevLink.backend.entity.enums.ProjectStatus;
 import com.DevLink.backend.exception.BadRequestException;
@@ -12,6 +13,8 @@ import com.DevLink.backend.exception.UnauthorizedException;
 import com.DevLink.backend.repository.ApplicationRepository;
 import com.DevLink.backend.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,35 +87,32 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProjectResponse> listPublishedProjects(List<Integer> technologyIds, String emailOrNull) {
+    public Page<ProjectResponse> listPublishedProjects(List<Integer> technologyIds, String emailOrNull, Pageable pageable) {
         Long currentUserId = null;
         if (emailOrNull != null) {
             currentUserId = userService.getCurrentUserEntity(emailOrNull).getId();
         }
 
-        List<Project> projects;
+        Page<Project> projectsPage;
         if (technologyIds == null || technologyIds.isEmpty()) {
-            projects = projectRepository.findByStatusOrderByCreatedAtDesc(ProjectStatus.LOOKING_FOR_COLLABORATORS);
+            projectsPage = projectRepository.findByStatusOrderByCreatedAtDesc(ProjectStatus.LOOKING_FOR_COLLABORATORS, pageable);
         } else {
             List<Integer> uniqueTechnologyIds = new HashSet<>(technologyIds).stream().toList();
-            List<Long> projectIds = projectRepository.findPublishedIdsByAllTechnologies(
+            Page<Long> projectIdsPage = projectRepository.findPublishedIdsByAllTechnologies(
                     ProjectStatus.LOOKING_FOR_COLLABORATORS.name(),
                     uniqueTechnologyIds,
-                    uniqueTechnologyIds.size()
+                    uniqueTechnologyIds.size(),
+                    pageable
             );
-            projects = projectIds.stream()
-                    .map(this::getProjectEntity)
-                    .toList();
+            projectsPage = projectIdsPage.map(this::getProjectEntity);
         }
 
         Long finalCurrentUserId = currentUserId;
-        return projects.stream()
-                .map(project -> mapperService.toProjectResponse(
-                        project,
-                        finalCurrentUserId,
-                        finalCurrentUserId != null && applicationRepository.existsByProjectIdAndApplicantId(project.getId(), finalCurrentUserId)
-                ))
-                .toList();
+        return projectsPage.map(project -> mapperService.toProjectResponse(
+                project,
+                finalCurrentUserId,
+                finalCurrentUserId != null && applicationRepository.existsByProjectIdAndApplicantId(project.getId(), finalCurrentUserId)
+        ));
     }
 
     @Transactional(readOnly = true)
@@ -174,6 +174,93 @@ public class ProjectService {
                 .stream()
                 .map(mapperService::toApplicationResponse)
                 .toList();
+    }
+
+    @Transactional
+    public ApplicationResponse acceptApplication(Long projectId, Long applicationId, String email) {
+        User currentUser = userService.getCurrentUserEntity(email);
+        Project project = getProjectEntity(projectId);
+        validateOwner(project, currentUser.getId());
+
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new NotFoundException("Application not found"));
+
+        if (!application.getProject().getId().equals(projectId)) {
+            throw new BadRequestException("Application does not belong to this project");
+        }
+
+        if (application.getStatus() != ApplicationStatus.PENDING) {
+            throw new BadRequestException("Only pending applications can be accepted");
+        }
+
+        application.setStatus(ApplicationStatus.ACCEPTED);
+        Application saved = applicationRepository.save(application);
+
+        notificationService.create(application.getApplicant(),
+                "Application accepted",
+                "Your application to project '" + project.getTitle() + "' has been accepted!",
+                NotificationType.APPLICATION_ACCEPTED);
+
+        return mapperService.toApplicationResponse(saved);
+    }
+
+    @Transactional
+    public ApplicationResponse rejectApplication(Long projectId, Long applicationId, String email) {
+        User currentUser = userService.getCurrentUserEntity(email);
+        Project project = getProjectEntity(projectId);
+        validateOwner(project, currentUser.getId());
+
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new NotFoundException("Application not found"));
+
+        if (!application.getProject().getId().equals(projectId)) {
+            throw new BadRequestException("Application does not belong to this project");
+        }
+
+        if (application.getStatus() != ApplicationStatus.PENDING) {
+            throw new BadRequestException("Only pending applications can be rejected");
+        }
+
+        application.setStatus(ApplicationStatus.REJECTED);
+        Application saved = applicationRepository.save(application);
+
+        notificationService.create(application.getApplicant(),
+                "Application rejected",
+                "Your application to project '" + project.getTitle() + "' has been rejected.",
+                NotificationType.APPLICATION_REJECTED);
+
+        return mapperService.toApplicationResponse(saved);
+    }
+
+    @Transactional
+    public ApplicationResponse withdrawApplication(Long projectId, Long applicationId, String email) {
+        User currentUser = userService.getCurrentUserEntity(email);
+        Project project = getProjectEntity(projectId);
+
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new NotFoundException("Application not found"));
+
+        if (!application.getProject().getId().equals(projectId)) {
+            throw new BadRequestException("Application does not belong to this project");
+        }
+
+        if (!application.getApplicant().getId().equals(currentUser.getId())) {
+            throw new UnauthorizedException("You can only withdraw your own applications");
+        }
+
+        if (application.getStatus() != ApplicationStatus.PENDING) {
+            throw new BadRequestException("Only pending applications can be withdrawn");
+        }
+
+        application.setStatus(ApplicationStatus.WITHDRAWN);
+        Application saved = applicationRepository.save(application);
+
+        notificationService.create(project.getCreator(),
+                "Application withdrawn",
+                currentUser.getFullName() + " has withdrawn their application to your project '" + project.getTitle() + "'.",
+                NotificationType.APPLICATION_WITHDRAWN);
+
+        return mapperService.toApplicationResponse(saved);
     }
 
     private Project getProjectEntity(Long projectId) {

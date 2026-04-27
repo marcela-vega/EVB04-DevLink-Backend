@@ -4,6 +4,10 @@ import com.DevLink.backend.dto.*;
 import com.DevLink.backend.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -37,10 +41,13 @@ public class ProjectController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProjectResponse>> listPublished(@RequestParam(required = false) List<Integer> technologyIds,
+    public ResponseEntity<Page<ProjectResponse>> listPublished(@RequestParam(required = false) List<Integer> technologyIds,
+                                                               @RequestParam(defaultValue = "0") int page,
+                                                               @RequestParam(defaultValue = "20") int size,
                                                                Authentication authentication) {
         String email = authentication != null ? authentication.getName() : null;
-        return ResponseEntity.ok(projectService.listPublishedProjects(technologyIds, email));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return ResponseEntity.ok(projectService.listPublishedProjects(technologyIds, email, pageable));
     }
 
     @GetMapping("/{id}")
@@ -59,5 +66,26 @@ public class ProjectController {
     public ResponseEntity<List<ApplicationResponse>> getApplications(@PathVariable Long id,
                                                                      Authentication authentication) {
         return ResponseEntity.ok(projectService.getApplications(id, authentication.getName()));
+    }
+
+    @PutMapping("/{projectId}/applications/{applicationId}/accept")
+    public ResponseEntity<ApplicationResponse> acceptApplication(@PathVariable Long projectId,
+                                                                  @PathVariable Long applicationId,
+                                                                  Authentication authentication) {
+        return ResponseEntity.ok(projectService.acceptApplication(projectId, applicationId, authentication.getName()));
+    }
+
+    @PutMapping("/{projectId}/applications/{applicationId}/reject")
+    public ResponseEntity<ApplicationResponse> rejectApplication(@PathVariable Long projectId,
+                                                                  @PathVariable Long applicationId,
+                                                                  Authentication authentication) {
+        return ResponseEntity.ok(projectService.rejectApplication(projectId, applicationId, authentication.getName()));
+    }
+
+    @PutMapping("/{projectId}/applications/{applicationId}/withdraw")
+    public ResponseEntity<ApplicationResponse> withdrawApplication(@PathVariable Long projectId,
+                                                                    @PathVariable Long applicationId,
+                                                                    Authentication authentication) {
+        return ResponseEntity.ok(projectService.withdrawApplication(projectId, applicationId, authentication.getName()));
     }
 }
