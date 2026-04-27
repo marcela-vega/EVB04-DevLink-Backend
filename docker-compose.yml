@@ -1,36 +1,15 @@
-version: "3.9"
-
 services:
   app:
     build: .
     container_name: devlink_app
     restart: always
-    ports:
-      - "${SERVER_PORT:-8080}:8080"
+    network_mode: host
     environment:
       DB_URL: ${DB_URL}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       JPA_DDL_AUTO: ${JPA_DDL_AUTO:-validate}
-      SERVER_PORT: 8080
+      SERVER_PORT: ${SERVER_PORT:-8080}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
-    depends_on:
-      - postgres
 
-  postgres:
-    image: postgres:16
-    container_name: devlink_postgres
-    restart: always
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d
-
-volumes:
-  postgres_data:
