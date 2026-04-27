@@ -14,27 +14,28 @@
 | 8 | POST | /api/projects | Crear proyecto (borrador) | Sí |
 | 9 | PUT | /api/projects/{id} | Actualizar proyecto | Sí |
 | 10 | PUT | /api/projects/{id}/publish | Publicar proyecto | Sí |
-| 11 | GET | /api/projects | Listar proyectos | No |
-| 12 | GET | /api/projects/{id} | Ver proyecto | No |
-| 13 | POST | /api/projects/{id}/apply | Aplicar a proyecto | Sí |
-| 14 | GET | /api/projects/{id}/applications | Ver solicitudes | Sí |
-| 15 | PUT | /api/projects/{pid}/applications/{aid}/accept | Aceptar solicitud | Sí |
-| 16 | PUT | /api/projects/{pid}/applications/{aid}/reject | Rechazar solicitud | Sí |
-| 17 | PUT | /api/projects/{pid}/applications/{aid}/withdraw | Retirar solicitud | Sí |
-| 18 | POST | /api/discussions | Crear discusión | Sí |
-| 19 | GET | /api/discussions | Listar discusiones | No |
-| 20 | GET | /api/discussions/{id} | Ver discusión | No |
-| 21 | PUT | /api/discussions/{id} | Actualizar discusión | Sí |
-| 22 | DELETE | /api/discussions/{id} | Eliminar discusión | Sí |
-| 23 | POST | /api/discussions/{id}/comments | Crear comentario | Sí |
-| 24 | GET | /api/discussions/{id}/comments | Listar comentarios | No |
-| 25 | PUT | /api/comments/{id} | Actualizar comentario | Sí |
-| 26 | DELETE | /api/comments/{id} | Eliminar comentario | Sí |
-| 27 | POST | /api/messages | Enviar mensaje | Sí |
-| 28 | GET | /api/messages/conversations | Listar conversaciones | Sí |
-| 29 | GET | /api/messages/conversations/{userId} | Ver mensajes | Sí |
-| 30 | GET | /api/notifications/me | Ver notificaciones | Sí |
-| 31 | GET | /api/statistics | Estadísticas | No |
+| 11 | GET | /api/projects | Listar proyectos publicados | No |
+| 12 | GET | /api/projects/all | Listar todos los proyectos publicados | No |
+| 13 | GET | /api/projects/{id} | Ver proyecto | No |
+| 14 | POST | /api/projects/{id}/apply | Aplicar a proyecto | Sí |
+| 15 | GET | /api/projects/{id}/applications | Ver solicitudes | Sí |
+| 16 | PUT | /api/projects/{pid}/applications/{aid}/accept | Aceptar solicitud | Sí |
+| 17 | PUT | /api/projects/{pid}/applications/{aid}/reject | Rechazar solicitud | Sí |
+| 18 | PUT | /api/projects/{pid}/applications/{aid}/withdraw | Retirar solicitud | Sí |
+| 19 | POST | /api/discussions | Crear discusión | Sí |
+| 20 | GET | /api/discussions | Listar discusiones | No |
+| 21 | GET | /api/discussions/{id} | Ver discusión | No |
+| 22 | PUT | /api/discussions/{id} | Actualizar discusión | Sí |
+| 23 | DELETE | /api/discussions/{id} | Eliminar discusión | Sí |
+| 24 | POST | /api/discussions/{id}/comments | Crear comentario | Sí |
+| 25 | GET | /api/discussions/{id}/comments | Listar comentarios | No |
+| 26 | PUT | /api/comments/{id} | Actualizar comentario | Sí |
+| 27 | DELETE | /api/comments/{id} | Eliminar comentario | Sí |
+| 28 | POST | /api/messages | Enviar mensaje | Sí |
+| 29 | GET | /api/messages/conversations | Listar conversaciones | Sí |
+| 30 | GET | /api/messages/conversations/{userId} | Ver mensajes | Sí |
+| 31 | GET | /api/notifications/me | Ver notificaciones | Sí |
+| 32 | GET | /api/statistics | Estadísticas | No |
 
 ## Importar en Postman
 

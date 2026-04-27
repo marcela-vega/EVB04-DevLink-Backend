@@ -304,6 +304,23 @@
           }
         },
         {
+          "name": "List All Projects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/projects/all?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "all"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Listar todos los proyectos publicados con paginación."
+          }
+        },
+        {
           "name": "Get Project By ID",
           "request": {
             "method": "GET",
