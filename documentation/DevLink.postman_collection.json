@@ -304,20 +304,25 @@
           }
         },
         {
-          "name": "List All Projects",
+          "name": "My Projects",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
-              "raw": "{{base_url}}/api/projects/all?page=0&size=20",
+              "raw": "{{base_url}}/api/projects/my?page=0&size=20",
               "host": ["{{base_url}}"],
-              "path": ["api", "projects", "all"],
+              "path": ["api", "projects", "my"],
               "query": [
                 { "key": "page", "value": "0" },
                 { "key": "size", "value": "20" }
               ]
             },
-            "description": "Listar todos los proyectos publicados con paginación."
+            "description": "Listar mis proyectos (borradores y publicados) con paginación."
           }
         },
         {

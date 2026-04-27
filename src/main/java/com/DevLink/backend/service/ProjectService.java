@@ -116,31 +116,25 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProjectResponse> listAllProjects(List<Integer> technologyIds, String emailOrNull, Pageable pageable) {
-        Long currentUserId = null;
-        if (emailOrNull != null) {
-            currentUserId = userService.getCurrentUserEntity(emailOrNull).getId();
-        }
-
-        Page<Project> projectsPage;
-        if (technologyIds == null || technologyIds.isEmpty()) {
-            projectsPage = projectRepository.findByStatusOrderByCreatedAtDesc(ProjectStatus.LOOKING_FOR_COLLABORATORS, pageable);
-        } else {
-            List<Integer> uniqueTechnologyIds = new HashSet<>(technologyIds).stream().toList();
-            Page<Long> projectIdsPage = projectRepository.findPublishedIdsByAllTechnologies(
-                    ProjectStatus.LOOKING_FOR_COLLABORATORS.name(),
-                    uniqueTechnologyIds,
-                    uniqueTechnologyIds.size(),
-                    pageable
-            );
-            projectsPage = projectIdsPage.map(this::getProjectEntity);
-        }
-
-        Long finalCurrentUserId = currentUserId;
+    public Page<ProjectResponse> listMyProjects(String email, Pageable pageable) {
+        User currentUser = userService.getCurrentUserEntity(email);
+        Page<Project> projectsPage = projectRepository.findByCreatorIdOrderByCreatedAtDesc(currentUser.getId(), pageable);
         return projectsPage.map(project -> mapperService.toProjectResponse(
                 project,
-                finalCurrentUserId,
-                finalCurrentUserId != null && applicationRepository.existsByProjectIdAndApplicantId(project.getId(), finalCurrentUserId)
+                currentUser.getId(),
+                applicationRepository.existsByProjectIdAndApplicantId(project.getId(), currentUser.getId())
+        ));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProjectResponse> listMyDrafts(String email, Pageable pageable) {
+        User currentUser = userService.getCurrentUserEntity(email);
+        Page<Project> projectsPage = projectRepository.findByCreatorIdAndStatusOrderByCreatedAtDesc(
+                currentUser.getId(), ProjectStatus.DRAFT, pageable);
+        return projectsPage.map(project -> mapperService.toProjectResponse(
+                project,
+                currentUser.getId(),
+                false
         ));
     }
 

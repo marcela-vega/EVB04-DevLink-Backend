@@ -19,6 +19,12 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @EntityGraph(attributePaths = {"creator", "technologies"})
     Page<Project> findByStatusOrderByCreatedAtDesc(ProjectStatus status, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"creator", "technologies"})
+    Page<Project> findByCreatorIdOrderByCreatedAtDesc(Long creatorId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"creator", "technologies"})
+    Page<Project> findByCreatorIdAndStatusOrderByCreatedAtDesc(Long creatorId, ProjectStatus status, Pageable pageable);
+
     @Query(value = """
             select pt.project_id
             from project_technologies pt

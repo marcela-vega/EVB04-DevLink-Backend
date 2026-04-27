@@ -15,7 +15,7 @@
 | 9 | PUT | /api/projects/{id} | Actualizar proyecto | Sí |
 | 10 | PUT | /api/projects/{id}/publish | Publicar proyecto | Sí |
 | 11 | GET | /api/projects | Listar proyectos publicados | No |
-| 12 | GET | /api/projects/all | Listar todos los proyectos publicados | No |
+| 12 | GET | /api/projects/my | Mis proyectos | Sí |
 | 13 | GET | /api/projects/{id} | Ver proyecto | No |
 | 14 | POST | /api/projects/{id}/apply | Aplicar a proyecto | Sí |
 | 15 | GET | /api/projects/{id}/applications | Ver solicitudes | Sí |
