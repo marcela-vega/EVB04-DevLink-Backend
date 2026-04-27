@@ -116,6 +116,35 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
+    public Page<ProjectResponse> listAllProjects(List<Integer> technologyIds, String emailOrNull, Pageable pageable) {
+        Long currentUserId = null;
+        if (emailOrNull != null) {
+            currentUserId = userService.getCurrentUserEntity(emailOrNull).getId();
+        }
+
+        Page<Project> projectsPage;
+        if (technologyIds == null || technologyIds.isEmpty()) {
+            projectsPage = projectRepository.findByStatusOrderByCreatedAtDesc(ProjectStatus.LOOKING_FOR_COLLABORATORS, pageable);
+        } else {
+            List<Integer> uniqueTechnologyIds = new HashSet<>(technologyIds).stream().toList();
+            Page<Long> projectIdsPage = projectRepository.findPublishedIdsByAllTechnologies(
+                    ProjectStatus.LOOKING_FOR_COLLABORATORS.name(),
+                    uniqueTechnologyIds,
+                    uniqueTechnologyIds.size(),
+                    pageable
+            );
+            projectsPage = projectIdsPage.map(this::getProjectEntity);
+        }
+
+        Long finalCurrentUserId = currentUserId;
+        return projectsPage.map(project -> mapperService.toProjectResponse(
+                project,
+                finalCurrentUserId,
+                finalCurrentUserId != null && applicationRepository.existsByProjectIdAndApplicantId(project.getId(), finalCurrentUserId)
+        ));
+    }
+
+    @Transactional(readOnly = true)
     public ProjectResponse getProject(Long projectId, String emailOrNull) {
         Project project = getProjectEntity(projectId);
         Long currentUserId = null;

@@ -50,6 +50,16 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.listPublishedProjects(technologyIds, email, pageable));
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<Page<ProjectResponse>> listAllPublished(@RequestParam(required = false) List<Integer> technologyIds,
+                                                                   @RequestParam(defaultValue = "0") int page,
+                                                                   @RequestParam(defaultValue = "20") int size,
+                                                                   Authentication authentication) {
+        String email = authentication != null ? authentication.getName() : null;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return ResponseEntity.ok(projectService.listAllProjects(technologyIds, email, pageable));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponse> getById(@PathVariable Long id, Authentication authentication) {
         String email = authentication != null ? authentication.getName() : null;
