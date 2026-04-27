@@ -14,6 +14,7 @@ import com.DevLink.backend.repository.ApplicationRepository;
 import com.DevLink.backend.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,11 +99,12 @@ public class ProjectService {
             projectsPage = projectRepository.findByStatusOrderByCreatedAtDesc(ProjectStatus.LOOKING_FOR_COLLABORATORS, pageable);
         } else {
             List<Integer> uniqueTechnologyIds = new HashSet<>(technologyIds).stream().toList();
+            Pageable nativePageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
             Page<Long> projectIdsPage = projectRepository.findPublishedIdsByAllTechnologies(
                     ProjectStatus.LOOKING_FOR_COLLABORATORS.name(),
                     uniqueTechnologyIds,
                     uniqueTechnologyIds.size(),
-                    pageable
+                    nativePageable
             );
             projectsPage = projectIdsPage.map(this::getProjectEntity);
         }

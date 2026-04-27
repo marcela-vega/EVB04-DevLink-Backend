@@ -10,6 +10,7 @@ import com.DevLink.backend.repository.CommentRepository;
 import com.DevLink.backend.repository.DiscussionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,7 +80,8 @@ public class DiscussionService {
             discussionsPage = discussionRepository.findAllByOrderByCreatedAtDesc(pageable);
         } else {
             List<Integer> uniqueIds = new HashSet<>(technologyIds).stream().toList();
-            Page<Long> idsPage = discussionRepository.findIdsByAllTechnologies(uniqueIds, uniqueIds.size(), pageable);
+            Pageable nativePageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+            Page<Long> idsPage = discussionRepository.findIdsByAllTechnologies(uniqueIds, uniqueIds.size(), nativePageable);
             discussionsPage = idsPage.map(this::getDiscussionEntity);
         }
         return discussionsPage.map(d -> mapperService.toDiscussionResponse(d, (int) commentRepository.countByDiscussionId(d.getId())));
