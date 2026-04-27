@@ -20,9 +20,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     Page<Project> findByStatusOrderByCreatedAtDesc(ProjectStatus status, Pageable pageable);
 
     @EntityGraph(attributePaths = {"creator", "technologies"})
-    Page<Project> findByCreatorIdOrderByCreatedAtDesc(Long creatorId, Pageable pageable);
-
-    @EntityGraph(attributePaths = {"creator", "technologies"})
     Page<Project> findByCreatorIdAndStatusOrderByCreatedAtDesc(Long creatorId, ProjectStatus status, Pageable pageable);
 
     @Query(value = """
@@ -32,7 +29,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
             where p.status = :status and pt.technology_id in (:technologyIds)
             group by pt.project_id
             having count(distinct pt.technology_id) = :technologyCount
-            order by max(p.created_at) desc
             """, countQuery = """
             select count(distinct pt.project_id)
             from project_technologies pt

@@ -118,7 +118,8 @@ public class ProjectService {
     @Transactional(readOnly = true)
     public Page<ProjectResponse> listMyProjects(String email, Pageable pageable) {
         User currentUser = userService.getCurrentUserEntity(email);
-        Page<Project> projectsPage = projectRepository.findByCreatorIdOrderByCreatedAtDesc(currentUser.getId(), pageable);
+        Page<Project> projectsPage = projectRepository.findByCreatorIdAndStatusOrderByCreatedAtDesc(
+                currentUser.getId(), ProjectStatus.LOOKING_FOR_COLLABORATORS, pageable);
         return projectsPage.map(project -> mapperService.toProjectResponse(
                 project,
                 currentUser.getId(),
