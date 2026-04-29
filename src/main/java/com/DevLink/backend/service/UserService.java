@@ -32,10 +32,14 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserProfileResponse getPublicProfile(Long userId) {
-        User user = userRepository.findWithRolesAndTechnologiesById(userId)
+    public User getPublicUserEntity(Long userId) {
+        return userRepository.findWithRolesAndTechnologiesById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
-        return mapperService.toUserProfileResponse(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserProfileResponse getPublicProfile(Long userId) {
+        return mapperService.toUserProfileResponse(getPublicUserEntity(userId));
     }
 
     @Transactional

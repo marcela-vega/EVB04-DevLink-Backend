@@ -85,6 +85,53 @@ CREATE INDEX idx_notifications_user_created_at ON notifications(user_id, created
 INSERT INTO roles (name) VALUES ('DEVELOPER'), ('ADMIN'), ('MODERATOR')
 ON CONFLICT (name) DO NOTHING;
 
+CREATE TABLE discussions (
+    id BIGSERIAL PRIMARY KEY,
+    author_id BIGINT NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_discussions_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE discussion_technologies (
+    discussion_id BIGINT NOT NULL,
+    technology_id INT NOT NULL,
+    PRIMARY KEY (discussion_id, technology_id),
+    CONSTRAINT fk_discussion_technologies_discussion FOREIGN KEY (discussion_id) REFERENCES discussions(id) ON DELETE CASCADE,
+    CONSTRAINT fk_discussion_technologies_technology FOREIGN KEY (technology_id) REFERENCES technologies(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_discussions_created_at ON discussions(created_at DESC);
+
+CREATE TABLE comments (
+    id BIGSERIAL PRIMARY KEY,
+    author_id BIGINT NOT NULL,
+    discussion_id BIGINT NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_comments_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_comments_discussion FOREIGN KEY (discussion_id) REFERENCES discussions(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_comments_discussion_id ON comments(discussion_id, created_at ASC);
+
+CREATE TABLE messages (
+    id BIGSERIAL PRIMARY KEY,
+    sender_id BIGINT NOT NULL,
+    receiver_id BIGINT NOT NULL,
+    content TEXT NOT NULL,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_messages_sender FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_messages_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_messages_receiver_created_at ON messages(receiver_id, created_at DESC);
+CREATE INDEX idx_messages_sender_receiver ON messages(sender_id, receiver_id, created_at DESC);
+
 INSERT INTO technologies (name) VALUES
 ('Java'), ('Spring Boot'), ('PostgreSQL'), ('Docker'),
 ('JavaScript'), ('TypeScript'), ('React'), ('Angular'),

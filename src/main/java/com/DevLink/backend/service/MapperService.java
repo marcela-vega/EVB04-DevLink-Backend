@@ -89,4 +89,45 @@ public class MapperService {
     public List<TechnologyResponse> toTechnologyResponses(List<Technology> technologies) {
         return technologies.stream().map(this::toTechnologyResponse).toList();
     }
+
+    public DiscussionResponse toDiscussionResponse(Discussion discussion, int commentCount) {
+        return new DiscussionResponse(
+                discussion.getId(),
+                discussion.getTitle(),
+                discussion.getContent(),
+                discussion.getAuthor().getId(),
+                discussion.getAuthor().getFullName(),
+                discussion.getTechnologies().stream()
+                        .sorted(Comparator.comparing(Technology::getName))
+                        .map(this::toTechnologyResponse)
+                        .toList(),
+                commentCount,
+                discussion.getCreatedAt(),
+                discussion.getUpdatedAt()
+        );
+    }
+
+    public CommentResponse toCommentResponse(Comment comment) {
+        return new CommentResponse(
+                comment.getId(),
+                comment.getContent(),
+                comment.getAuthor().getId(),
+                comment.getAuthor().getFullName(),
+                comment.getCreatedAt(),
+                comment.getUpdatedAt()
+        );
+    }
+
+    public MessageResponse toMessageResponse(Message message) {
+        return new MessageResponse(
+                message.getId(),
+                message.getSender().getId(),
+                message.getSender().getFullName(),
+                message.getReceiver().getId(),
+                message.getReceiver().getFullName(),
+                message.getContent(),
+                Boolean.TRUE.equals(message.getIsRead()),
+                message.getCreatedAt()
+        );
+    }
 }

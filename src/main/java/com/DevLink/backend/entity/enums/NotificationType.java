@@ -2,6 +2,12 @@ package com.DevLink.backend.entity.enums;
 
 public enum NotificationType {
     APPLICATION_RECEIVED,
+    APPLICATION_ACCEPTED,
+    APPLICATION_REJECTED,
+    APPLICATION_WITHDRAWN,
     PROJECT_PUBLISHED,
-    PROFILE_UPDATED
+    PROFILE_UPDATED,
+    NEW_COMMENT,
+    NEW_MESSAGE,
+    NEW_DISCUSSION
 }

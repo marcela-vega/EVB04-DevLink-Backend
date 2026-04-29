@@ -1,0 +1,743 @@
+{
+  "info": {
+    "name": "DevLink API",
+    "description": "Colección completa de endpoints del backend DevLink.\n\nCompatible con Postman y Bruno.\n\nVariables:\n- `{{base_url}}`: URL base del servidor (default: http://localhost:8080)\n- `{{token}}`: Token JWT obtenido al hacer login/register",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Juan Perez\",\n  \"email\": \"juan@example.com\",\n  \"password\": \"Password123\",\n  \"technologyIds\": [1, 2, 5],\n  \"bio\": \"Desarrollador Full Stack\",\n  \"githubUrl\": \"https://github.com/juanperez\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Registrar un nuevo usuario. Retorna token JWT y datos del usuario."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "    console.log('Token guardado automáticamente');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan@example.com\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Iniciar sesión. Retorna token JWT y datos del usuario."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "    console.log('Token guardado automáticamente');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Verificación de estado del servicio."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Technologies",
+      "item": [
+        {
+          "name": "List Technologies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/technologies",
+              "host": ["{{base_url}}"],
+              "path": ["api", "technologies"]
+            },
+            "description": "Listar todas las tecnologías disponibles."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "me"]
+            },
+            "description": "Obtener el perfil del usuario autenticado."
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Juan Perez Updated\",\n  \"bio\": \"Full Stack Developer\",\n  \"githubUrl\": \"https://github.com/juanperez\",\n  \"gitlabUrl\": \"https://gitlab.com/juanperez\",\n  \"technologyIds\": [1, 2, 5, 7]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "me"]
+            },
+            "description": "Actualizar el perfil del usuario autenticado."
+          }
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "1"]
+            },
+            "description": "Obtener el perfil público de un usuario por ID."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "Create Draft",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Mi Proyecto\",\n  \"description\": \"Descripción del proyecto\",\n  \"technologyIds\": [1, 2]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects"]
+            },
+            "description": "Crear un nuevo proyecto en estado borrador."
+          }
+        },
+        {
+          "name": "Update Draft",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Mi Proyecto Actualizado\",\n  \"description\": \"Nueva descripción del proyecto\",\n  \"technologyIds\": [1, 2, 3]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "1"]
+            },
+            "description": "Actualizar un proyecto en estado borrador."
+          }
+        },
+        {
+          "name": "Publish Project",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/projects/1/publish",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "1", "publish"]
+            },
+            "description": "Publicar un proyecto borrador para que sea visible."
+          }
+        },
+        {
+          "name": "List Published Projects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/projects?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Listar proyectos publicados con paginación."
+          }
+        },
+        {
+          "name": "List Projects By Technology",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/projects?technologyIds=1,2&page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects"],
+              "query": [
+                { "key": "technologyIds", "value": "1,2" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Listar proyectos filtrados por tecnologías."
+          }
+        },
+        {
+          "name": "My Projects",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/projects/my?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "my"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Listar mis proyectos (borradores y publicados) con paginación."
+          }
+        },
+        {
+          "name": "Get Project By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/projects/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "1"]
+            },
+            "description": "Obtener un proyecto por ID."
+          }
+        },
+        {
+          "name": "Apply To Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/projects/1/apply",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "1", "apply"]
+            },
+            "description": "Aplicar/solicitar participación en un proyecto."
+          }
+        },
+        {
+          "name": "Get Applications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/projects/1/applications",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "1", "applications"]
+            },
+            "description": "Obtener las solicitudes de un proyecto (solo el creador)."
+          }
+        },
+        {
+          "name": "Accept Application",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/projects/1/applications/1/accept",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "1", "applications", "1", "accept"]
+            },
+            "description": "Aceptar una solicitud de participación."
+          }
+        },
+        {
+          "name": "Reject Application",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/projects/1/applications/1/reject",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "1", "applications", "1", "reject"]
+            },
+            "description": "Rechazar una solicitud de participación."
+          }
+        },
+        {
+          "name": "Withdraw Application",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/projects/1/applications/1/withdraw",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "1", "applications", "1", "withdraw"]
+            },
+            "description": "Retirar una solicitud de participación (por el solicitante)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Discussions",
+      "item": [
+        {
+          "name": "Create Discussion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"¿Cómo implementar JWT en Spring Boot?\",\n  \"content\": \"Estoy tratando de implementar autenticación JWT en mi proyecto Spring Boot...\",\n  \"technologyIds\": [1, 2]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/discussions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discussions"]
+            },
+            "description": "Crear una nueva discusión."
+          }
+        },
+        {
+          "name": "List Discussions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/discussions?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discussions"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Listar discusiones con paginación."
+          }
+        },
+        {
+          "name": "Get Discussion By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/discussions/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discussions", "1"]
+            },
+            "description": "Obtener una discusión por ID."
+          }
+        },
+        {
+          "name": "Update Discussion",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Título actualizado\",\n  \"content\": \"Contenido actualizado de la discusión\",\n  \"technologyIds\": [1, 2, 3]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/discussions/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discussions", "1"]
+            },
+            "description": "Actualizar una discusión existente."
+          }
+        },
+        {
+          "name": "Delete Discussion",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/discussions/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discussions", "1"]
+            },
+            "description": "Eliminar una discusión."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Comments",
+      "item": [
+        {
+          "name": "Create Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Excelente discusión, muy útil!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/discussions/1/comments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discussions", "1", "comments"]
+            },
+            "description": "Crear un comentario en una discusión."
+          }
+        },
+        {
+          "name": "List Comments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/discussions/1/comments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "discussions", "1", "comments"]
+            },
+            "description": "Listar comentarios de una discusión."
+          }
+        },
+        {
+          "name": "Update Comment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Comentario actualizado\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/comments/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "comments", "1"]
+            },
+            "description": "Actualizar un comentario existente."
+          }
+        },
+        {
+          "name": "Delete Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/comments/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "comments", "1"]
+            },
+            "description": "Eliminar un comentario."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Messages",
+      "item": [
+        {
+          "name": "Send Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receiverId\": 2,\n  \"content\": \"Hola, ¿cómo estás?\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"]
+            },
+            "description": "Enviar un mensaje a otro usuario."
+          }
+        },
+        {
+          "name": "Get Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/messages/conversations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages", "conversations"]
+            },
+            "description": "Obtener la lista de conversaciones del usuario."
+          }
+        },
+        {
+          "name": "Get Conversation Messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/messages/conversations/2?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages", "conversations", "2"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Obtener mensajes de una conversación con paginación."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get My Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/me?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notifications", "me"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            },
+            "description": "Obtener notificaciones del usuario con paginación."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Statistics",
+      "item": [
+        {
+          "name": "Get Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/statistics",
+              "host": ["{{base_url}}"],
+              "path": ["api", "statistics"]
+            },
+            "description": "Obtener estadísticas generales de la plataforma."
+          }
+        }
+      ]
+    }
+  ]
+}
