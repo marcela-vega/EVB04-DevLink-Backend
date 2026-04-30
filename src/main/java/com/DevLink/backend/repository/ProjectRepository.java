@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
+    int countByCreatorId(Long creatorId);
     @EntityGraph(attributePaths = {"creator", "technologies"})
     Optional<Project> findDetailedById(Long id);
 

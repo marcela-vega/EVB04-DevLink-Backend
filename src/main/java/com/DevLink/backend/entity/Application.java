@@ -22,6 +22,9 @@ public class Application {
     @JoinColumn(name = "applicant_id", nullable = false)
     private User applicant;
 
+    @Column(columnDefinition = "TEXT")
+    private String message;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private ApplicationStatus status;
@@ -29,11 +32,21 @@ public class Application {
     @Column(name = "applied_at", nullable = false)
     private LocalDateTime appliedAt;
 
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
     @PrePersist
     public void onCreate() {
-        this.appliedAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        this.appliedAt = now;
+        this.updatedAt = now;
         if (this.status == null) {
             this.status = ApplicationStatus.PENDING;
         }
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

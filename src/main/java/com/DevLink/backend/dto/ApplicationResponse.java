@@ -1,17 +1,15 @@
 package com.DevLink.backend.dto;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 public record ApplicationResponse(
         Long id,
-        String status,
-        LocalDateTime appliedAt,
+        Long projectId,
+        ProjectResponse project,
         Long applicantId,
-        String applicantName,
-        String applicantEmail,
-        String applicantBio,
-        String githubUrl,
-        String gitlabUrl,
-        List<TechnologyResponse> technologies
+        UserProfileResponse applicant,
+        String message,
+        String status,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {}

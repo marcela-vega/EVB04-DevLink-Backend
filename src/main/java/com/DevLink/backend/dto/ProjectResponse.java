@@ -7,11 +7,15 @@ public record ProjectResponse(
         Long id,
         String title,
         String description,
+        List<String> stackRequired,
         String status,
         Long creatorId,
-        String creatorName,
-        List<TechnologyResponse> technologies,
+        UserProfileResponse creator,
+        List<UserProfileResponse> collaborators,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
+        LocalDateTime startedAt,
+        LocalDateTime completedAt,
+        int applicationCount,
         boolean canApply
 ) {}

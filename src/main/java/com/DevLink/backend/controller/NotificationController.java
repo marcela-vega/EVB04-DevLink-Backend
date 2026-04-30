@@ -6,9 +6,7 @@ import com.DevLink.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,9 +17,16 @@ public class NotificationController {
     private final NotificationService notificationService;
     private final UserService userService;
 
-    @GetMapping("/me")
+    @GetMapping
     public ResponseEntity<List<NotificationResponse>> getMyNotifications(Authentication authentication) {
         Long userId = userService.getCurrentUserEntity(authentication.getName()).getId();
         return ResponseEntity.ok(notificationService.getForUser(userId));
+    }
+
+    @PostMapping("/{id}/read")
+    public ResponseEntity<Void> markAsRead(@PathVariable Long id, Authentication authentication) {
+        Long userId = userService.getCurrentUserEntity(authentication.getName()).getId();
+        notificationService.markAsRead(id, userId);
+        return ResponseEntity.noContent().build();
     }
 }

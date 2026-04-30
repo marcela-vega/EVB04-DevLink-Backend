@@ -15,6 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +34,9 @@ public class AuthService {
     private final JwtService jwtService;
     private final MapperService mapperService;
 
+    @org.springframework.beans.factory.annotation.Value("${app.jwt.expiration-ms}")
+    private long expirationMs;
+
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmailIgnoreCase(request.email())) {
@@ -40,8 +46,12 @@ public class AuthService {
         Role developerRole = roleRepository.findByName("DEVELOPER")
                 .orElseThrow(() -> new NotFoundException("Default role DEVELOPER not found"));
 
+        List<Integer> techIds = request.stack() != null
+                ? request.stack().stream().map(Integer::valueOf).toList()
+                : List.of();
+
         User user = User.builder()
-                .fullName(request.fullName().trim())
+                .fullName(request.name().trim())
                 .email(request.email().trim().toLowerCase())
                 .passwordHash(passwordEncoder.encode(request.password()))
                 .bio(trimToNull(request.bio()))
@@ -49,12 +59,12 @@ public class AuthService {
                 .gitlabUrl(trimToNull(request.gitlabUrl()))
                 .active(true)
                 .roles(new HashSet<>(List.of(developerRole)))
-                .technologies(new HashSet<>(technologyService.getTechnologiesByIds(request.technologyIds())))
+                .technologies(new HashSet<>(technologyService.getTechnologiesByIds(techIds)))
                 .build();
 
         User saved = userRepository.save(user);
         String token = generateToken(saved);
-        return new AuthResponse(token, mapperService.toUserProfileResponse(saved));
+        return new AuthResponse(token, mapperService.toUserProfileResponse(saved), buildExpiresAt());
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -66,7 +76,7 @@ public class AuthService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         String token = generateToken(user);
-        return new AuthResponse(token, mapperService.toUserProfileResponse(user));
+        return new AuthResponse(token, mapperService.toUserProfileResponse(user), buildExpiresAt());
     }
 
     private String generateToken(User user) {
@@ -82,6 +92,12 @@ public class AuthService {
         claims.put("userId", user.getId());
         claims.put("roles", user.getRoles().stream().map(Role::getName).toList());
         return jwtService.generateToken(principal, claims);
+    }
+
+    private String buildExpiresAt() {
+        return Instant.now().plusMillis(expirationMs)
+                .atOffset(ZoneOffset.UTC)
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
     private String trimToNull(String value) {

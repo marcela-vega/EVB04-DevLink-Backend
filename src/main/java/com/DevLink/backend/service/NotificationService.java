@@ -4,6 +4,8 @@ import com.DevLink.backend.dto.NotificationResponse;
 import com.DevLink.backend.entity.Notification;
 import com.DevLink.backend.entity.User;
 import com.DevLink.backend.entity.enums.NotificationType;
+import com.DevLink.backend.exception.NotFoundException;
+import com.DevLink.backend.exception.UnauthorizedException;
 import com.DevLink.backend.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,5 +36,16 @@ public class NotificationService {
                 .stream()
                 .map(mapperService::toNotificationResponse)
                 .toList();
+    }
+
+    @Transactional
+    public void markAsRead(Long notificationId, Long userId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new NotFoundException("Notification not found"));
+        if (!notification.getUser().getId().equals(userId)) {
+            throw new UnauthorizedException("Not your notification");
+        }
+        notification.setIsRead(true);
+        notificationRepository.save(notification);
     }
 }

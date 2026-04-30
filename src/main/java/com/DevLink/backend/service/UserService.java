@@ -41,11 +41,14 @@ public class UserService {
     @Transactional
     public UserProfileResponse updateProfile(String email, UpdateProfileRequest request) {
         User user = getCurrentUserEntity(email);
-        user.setFullName(request.fullName().trim());
+        if (request.name() != null) user.setFullName(request.name().trim());
         user.setBio(trimToNull(request.bio()));
         user.setGithubUrl(trimToNull(request.githubUrl()));
         user.setGitlabUrl(trimToNull(request.gitlabUrl()));
-        user.setTechnologies(new HashSet<>(technologyService.getTechnologiesByIds(request.technologyIds())));
+        if (request.stack() != null) {
+            java.util.List<Integer> techIds = request.stack().stream().map(Integer::valueOf).toList();
+            user.setTechnologies(new HashSet<>(technologyService.getTechnologiesByIds(techIds)));
+        }
 
         User saved = userRepository.save(user);
         notificationService.create(saved,

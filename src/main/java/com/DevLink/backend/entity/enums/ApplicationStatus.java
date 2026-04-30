@@ -1,5 +1,8 @@
 package com.DevLink.backend.entity.enums;
 
 public enum ApplicationStatus {
-    PENDING
+    PENDING,
+    ACCEPTED,
+    REJECTED,
+    CLOSED
 }
