@@ -2,5 +2,7 @@ package com.DevLink.backend.entity.enums;
 
 public enum ProjectStatus {
     DRAFT,
-    LOOKING_FOR_COLLABORATORS
+    LOOKING_FOR_COLLABORATORS,
+    IN_DEVELOPMENT,
+    COMPLETED
 }

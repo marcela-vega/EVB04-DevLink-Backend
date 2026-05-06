@@ -4,14 +4,14 @@ import com.DevLink.backend.dto.NotificationResponse;
 import com.DevLink.backend.entity.Notification;
 import com.DevLink.backend.entity.User;
 import com.DevLink.backend.entity.enums.NotificationType;
+import com.DevLink.backend.exception.NotFoundException;
+import com.DevLink.backend.exception.UnauthorizedException;
 import com.DevLink.backend.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,5 +34,16 @@ public class NotificationService {
     public Page<NotificationResponse> getForUser(Long userId, Pageable pageable) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
                 .map(mapperService::toNotificationResponse);
+    }
+
+    @Transactional
+    public void markAsRead(Long notificationId, Long userId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new NotFoundException("Notification not found"));
+        if (!notification.getUser().getId().equals(userId)) {
+            throw new UnauthorizedException("You do not have permission to mark this notification as read");
+        }
+        notification.setIsRead(true);
+        notificationRepository.save(notification);
     }
 }
