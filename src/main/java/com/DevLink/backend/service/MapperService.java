@@ -2,32 +2,55 @@ package com.DevLink.backend.service;
 
 import com.DevLink.backend.dto.*;
 import com.DevLink.backend.entity.*;
+import com.DevLink.backend.entity.enums.ApplicationStatus;
+import com.DevLink.backend.repository.ApplicationRepository;
+import com.DevLink.backend.repository.ProjectRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class MapperService {
+    private final ProjectRepository projectRepository;
+    private final ApplicationRepository applicationRepository;
 
     public TechnologyResponse toTechnologyResponse(Technology technology) {
         return new TechnologyResponse(technology.getId(), technology.getName());
     }
 
     public UserProfileResponse toUserProfileResponse(User user) {
+        String role = user.getRoles().stream()
+                .map(Role::getName)
+                .sorted()
+                .findFirst()
+                .orElse("DEVELOPER")
+                .toLowerCase();
+
+        List<String> stack = user.getTechnologies().stream()
+                .sorted(Comparator.comparing(Technology::getName))
+                .map(Technology::getName)
+                .toList();
+
+        long projectsCount = projectRepository.countByCreatorId(user.getId());
+        long collaborationsCount = applicationRepository.countByApplicantIdAndStatus(
+                user.getId(), ApplicationStatus.ACCEPTED);
+
         return new UserProfileResponse(
                 user.getId(),
                 user.getFullName(),
                 user.getEmail(),
+                role,
+                Boolean.TRUE.equals(user.getActive()) ? "active" : "suspended",
+                stack,
                 user.getBio(),
+                null,
                 user.getGithubUrl(),
                 user.getGitlabUrl(),
-                Boolean.TRUE.equals(user.getActive()),
-                user.getRoles().stream().map(Role::getName).sorted().toList(),
-                user.getTechnologies().stream()
-                        .sorted(Comparator.comparing(Technology::getName))
-                        .map(this::toTechnologyResponse)
-                        .toList(),
+                projectsCount,
+                collaborationsCount,
                 user.getCreatedAt()
         );
     }

@@ -21,6 +21,10 @@ public class JwtService {
     @Value("${app.jwt.expiration-ms}")
     private long expirationMs;
 
+    public long getExpirationMs() {
+        return expirationMs;
+    }
+
     public String generateToken(UserDetails userDetails, Map<String, Object> extraClaims) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationMs);
