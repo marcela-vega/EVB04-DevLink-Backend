@@ -3,6 +3,7 @@ package com.DevLink.backend.service;
 import com.DevLink.backend.dto.*;
 import com.DevLink.backend.entity.*;
 import com.DevLink.backend.entity.enums.ApplicationStatus;
+import com.DevLink.backend.entity.enums.ProjectStatus;
 import com.DevLink.backend.repository.ApplicationRepository;
 import com.DevLink.backend.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -59,43 +60,82 @@ public class MapperService {
         boolean canApply = currentUserId != null
                 && project.getCreator() != null
                 && !project.getCreator().getId().equals(currentUserId)
-                && "LOOKING_FOR_COLLABORATORS".equals(project.getStatus().name())
+                && project.getStatus() == ProjectStatus.LOOKING_FOR_COLLABORATORS
                 && !hasAlreadyApplied;
+
+        List<String> stackRequired = project.getTechnologies().stream()
+                .sorted(Comparator.comparing(Technology::getName))
+                .map(Technology::getName)
+                .toList();
+
+        User creator = project.getCreator();
+        ProjectResponse.CreatorInfo creatorInfo = new ProjectResponse.CreatorInfo(
+                creator.getId(), creator.getFullName(), null);
+
+        long applicationCount = applicationRepository.countByProjectId(project.getId());
 
         return new ProjectResponse(
                 project.getId(),
                 project.getTitle(),
                 project.getDescription(),
-                project.getStatus().name(),
-                project.getCreator().getId(),
-                project.getCreator().getFullName(),
-                project.getTechnologies().stream()
-                        .sorted(Comparator.comparing(Technology::getName))
-                        .map(this::toTechnologyResponse)
-                        .toList(),
+                stackRequired,
+                toProjectStatus(project.getStatus()),
+                creator.getId(),
+                creatorInfo,
+                List.of(),
                 project.getCreatedAt(),
                 project.getUpdatedAt(),
+                null,
+                null,
+                applicationCount,
                 canApply
         );
     }
 
     public ApplicationResponse toApplicationResponse(Application application) {
         User applicant = application.getApplicant();
-        return new ApplicationResponse(
-                application.getId(),
-                application.getStatus().name(),
-                application.getAppliedAt(),
+        List<String> stack = applicant.getTechnologies().stream()
+                .sorted(Comparator.comparing(Technology::getName))
+                .map(Technology::getName)
+                .toList();
+        ApplicationResponse.ApplicantInfo applicantInfo = new ApplicationResponse.ApplicantInfo(
                 applicant.getId(),
                 applicant.getFullName(),
                 applicant.getEmail(),
+                stack,
+                null,
                 applicant.getBio(),
                 applicant.getGithubUrl(),
-                applicant.getGitlabUrl(),
-                applicant.getTechnologies().stream()
-                        .sorted(Comparator.comparing(Technology::getName))
-                        .map(this::toTechnologyResponse)
-                        .toList()
+                applicant.getGitlabUrl()
         );
+        return new ApplicationResponse(
+                application.getId(),
+                application.getProject().getId(),
+                applicant.getId(),
+                applicantInfo,
+                null,
+                toApplicationStatus(application.getStatus()),
+                application.getAppliedAt(),
+                application.getAppliedAt()
+        );
+    }
+
+    private String toProjectStatus(ProjectStatus status) {
+        return switch (status) {
+            case DRAFT -> "draft";
+            case LOOKING_FOR_COLLABORATORS -> "seeking_collaborators";
+            case IN_DEVELOPMENT -> "in_development";
+            case COMPLETED -> "completed";
+        };
+    }
+
+    private String toApplicationStatus(ApplicationStatus status) {
+        return switch (status) {
+            case PENDING -> "pending";
+            case ACCEPTED -> "accepted";
+            case REJECTED -> "rejected";
+            case WITHDRAWN -> "closed";
+        };
     }
 
     public NotificationResponse toNotificationResponse(Notification notification) {

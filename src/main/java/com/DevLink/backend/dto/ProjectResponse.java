@@ -7,11 +7,18 @@ public record ProjectResponse(
         Long id,
         String title,
         String description,
+        List<String> stackRequired,
         String status,
         Long creatorId,
-        String creatorName,
-        List<TechnologyResponse> technologies,
+        CreatorInfo creator,
+        List<CollaboratorInfo> collaborators,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
+        String startedAt,
+        String completedAt,
+        long applicationCount,
         boolean canApply
-) {}
+) {
+    public record CreatorInfo(Long id, String name, String avatar) {}
+    public record CollaboratorInfo(Long id, String name, String avatar) {}
+}
