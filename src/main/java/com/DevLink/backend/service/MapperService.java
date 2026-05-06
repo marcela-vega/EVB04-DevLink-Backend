@@ -141,10 +141,11 @@ public class MapperService {
     public NotificationResponse toNotificationResponse(Notification notification) {
         return new NotificationResponse(
                 notification.getId(),
+                notification.getType().name().toLowerCase(),
                 notification.getTitle(),
                 notification.getMessage(),
-                notification.getType().name(),
                 Boolean.TRUE.equals(notification.getIsRead()),
+                null,
                 notification.getCreatedAt()
         );
     }

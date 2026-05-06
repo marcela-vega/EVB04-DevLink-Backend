@@ -4,9 +4,10 @@ import java.time.LocalDateTime;
 
 public record NotificationResponse(
         Long id,
+        String type,
         String title,
         String message,
-        String type,
-        boolean isRead,
+        boolean read,
+        String link,
         LocalDateTime createdAt
 ) {}

@@ -8,9 +8,9 @@ import com.DevLink.backend.exception.NotFoundException;
 import com.DevLink.backend.exception.UnauthorizedException;
 import com.DevLink.backend.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -31,9 +31,11 @@ public class NotificationService {
     }
 
     @Transactional(readOnly = true)
-    public Page<NotificationResponse> getForUser(Long userId, Pageable pageable) {
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
-                .map(mapperService::toNotificationResponse);
+    public List<NotificationResponse> getForUser(Long userId) {
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(mapperService::toNotificationResponse)
+                .toList();
     }
 
     @Transactional
