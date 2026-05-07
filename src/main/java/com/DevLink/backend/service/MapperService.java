@@ -65,7 +65,7 @@ public class MapperService {
 
         List<String> stackRequired = project.getTechnologies().stream()
                 .sorted(Comparator.comparing(Technology::getName))
-                .map(Technology::getName)
+                .map(t -> String.valueOf(t.getId()))
                 .toList();
 
         User creator = project.getCreator();

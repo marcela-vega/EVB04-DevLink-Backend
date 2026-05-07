@@ -172,9 +172,6 @@ public class ProjectService {
         if (applicationRepository.existsByProjectIdAndApplicantId(projectId, applicant.getId())) {
             throw new BadRequestException("You have already applied to this project");
         }
-        if (!projectUsesAnyApplicantTechnology(project, applicant)) {
-            throw new BadRequestException("You can only apply to projects that match at least one technology in your stack");
-        }
 
         Application application = Application.builder()
                 .project(project)
