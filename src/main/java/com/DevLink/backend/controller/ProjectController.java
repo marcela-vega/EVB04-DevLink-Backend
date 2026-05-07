@@ -84,14 +84,14 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.getApplications(id, authentication.getName()));
     }
 
-    @PutMapping("/{projectId:[0-9]+}/applications/{applicationId:[0-9]+}/accept")
+    @PutMapping("/{projectId:[0-9]+}/applications/{applicationId:[0-9]+}/accepted")
     public ResponseEntity<ApplicationResponse> acceptApplication(@PathVariable Long projectId,
                                                                   @PathVariable Long applicationId,
                                                                   Authentication authentication) {
         return ResponseEntity.ok(projectService.acceptApplication(projectId, applicationId, authentication.getName()));
     }
 
-    @PutMapping("/{projectId:[0-9]+}/applications/{applicationId:[0-9]+}/reject")
+    @PutMapping("/{projectId:[0-9]+}/applications/{applicationId:[0-9]+}/rejected")
     public ResponseEntity<ApplicationResponse> rejectApplication(@PathVariable Long projectId,
                                                                   @PathVariable Long applicationId,
                                                                   Authentication authentication) {
@@ -103,5 +103,15 @@ public class ProjectController {
                                                                     @PathVariable Long applicationId,
                                                                     Authentication authentication) {
         return ResponseEntity.ok(projectService.withdrawApplication(projectId, applicationId, authentication.getName()));
+    }
+
+    @PostMapping("/{id:[0-9]+}/start-development")
+    public ResponseEntity<ProjectResponse> startDevelopment(@PathVariable Long id, Authentication authentication) {
+        return ResponseEntity.ok(projectService.startDevelopment(id, authentication.getName()));
+    }
+
+    @PostMapping("/{id:[0-9]+}/complete")
+    public ResponseEntity<ProjectResponse> completeProject(@PathVariable Long id, Authentication authentication) {
+        return ResponseEntity.ok(projectService.completeProject(id, authentication.getName()));
     }
 }

@@ -22,6 +22,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @EntityGraph(attributePaths = {"creator", "technologies"})
     Page<Project> findByCreatorIdAndStatusOrderByCreatedAtDesc(Long creatorId, ProjectStatus status, Pageable pageable);
 
+    long countByCreatorId(Long creatorId);
+
     @Query(value = """
             select pt.project_id
             from project_technologies pt

@@ -1,6 +1,7 @@
 services:
   app:
     build: .
+    image: devlink-backend
     container_name: devlink_app
     restart: always
     network_mode: host

@@ -5,13 +5,16 @@ import java.util.List;
 
 public record UserProfileResponse(
         Long id,
-        String fullName,
+        String name,
         String email,
+        String role,
+        String status,
+        List<String> stack,
         String bio,
+        String avatar,
         String githubUrl,
         String gitlabUrl,
-        boolean active,
-        List<String> roles,
-        List<TechnologyResponse> technologies,
+        long projectsCount,
+        long collaborationsCount,
         LocalDateTime createdAt
 ) {}

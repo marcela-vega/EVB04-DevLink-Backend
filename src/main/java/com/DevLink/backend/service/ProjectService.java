@@ -172,9 +172,6 @@ public class ProjectService {
         if (applicationRepository.existsByProjectIdAndApplicantId(projectId, applicant.getId())) {
             throw new BadRequestException("You have already applied to this project");
         }
-        if (!projectUsesAnyApplicantTechnology(project, applicant)) {
-            throw new BadRequestException("You can only apply to projects that match at least one technology in your stack");
-        }
 
         Application application = Application.builder()
                 .project(project)
@@ -287,6 +284,36 @@ public class ProjectService {
                 NotificationType.APPLICATION_WITHDRAWN);
 
         return mapperService.toApplicationResponse(saved);
+    }
+
+    @Transactional
+    public ProjectResponse startDevelopment(Long projectId, String email) {
+        User currentUser = userService.getCurrentUserEntity(email);
+        Project project = getProjectEntity(projectId);
+        validateOwner(project, currentUser.getId());
+
+        if (project.getStatus() != ProjectStatus.LOOKING_FOR_COLLABORATORS) {
+            throw new BadRequestException("Only projects looking for collaborators can start development");
+        }
+
+        project.setStatus(ProjectStatus.IN_DEVELOPMENT);
+        Project saved = projectRepository.save(project);
+        return mapperService.toProjectResponse(saved, currentUser.getId(), false);
+    }
+
+    @Transactional
+    public ProjectResponse completeProject(Long projectId, String email) {
+        User currentUser = userService.getCurrentUserEntity(email);
+        Project project = getProjectEntity(projectId);
+        validateOwner(project, currentUser.getId());
+
+        if (project.getStatus() != ProjectStatus.IN_DEVELOPMENT) {
+            throw new BadRequestException("Only projects in development can be completed");
+        }
+
+        project.setStatus(ProjectStatus.COMPLETED);
+        Project saved = projectRepository.save(project);
+        return mapperService.toProjectResponse(saved, currentUser.getId(), false);
     }
 
     private Project getProjectEntity(Long projectId) {

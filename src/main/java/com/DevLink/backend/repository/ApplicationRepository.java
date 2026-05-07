@@ -1,6 +1,7 @@
 package com.DevLink.backend.repository;
 
 import com.DevLink.backend.entity.Application;
+import com.DevLink.backend.entity.enums.ApplicationStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -14,4 +15,8 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     List<Application> findByProjectIdOrderByAppliedAtDesc(Long projectId);
 
     Optional<Application> findByProjectIdAndApplicantId(Long projectId, Long applicantId);
+
+    long countByApplicantIdAndStatus(Long applicantId, ApplicationStatus status);
+
+    long countByProjectId(Long projectId);
 }

@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -54,7 +55,8 @@ public class AuthService {
 
         User saved = userRepository.save(user);
         String token = generateToken(saved);
-        return new AuthResponse(token, mapperService.toUserProfileResponse(saved));
+        String expiresAt = Instant.now().plusMillis(jwtService.getExpirationMs()).toString();
+        return new AuthResponse(token, expiresAt, mapperService.toUserProfileResponse(saved));
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -66,7 +68,8 @@ public class AuthService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         String token = generateToken(user);
-        return new AuthResponse(token, mapperService.toUserProfileResponse(user));
+        String expiresAt = Instant.now().plusMillis(jwtService.getExpirationMs()).toString();
+        return new AuthResponse(token, expiresAt, mapperService.toUserProfileResponse(user));
     }
 
     private String generateToken(User user) {

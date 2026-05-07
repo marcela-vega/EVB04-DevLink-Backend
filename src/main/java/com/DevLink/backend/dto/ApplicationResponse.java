@@ -5,13 +5,22 @@ import java.util.List;
 
 public record ApplicationResponse(
         Long id,
-        String status,
-        LocalDateTime appliedAt,
+        Long projectId,
         Long applicantId,
-        String applicantName,
-        String applicantEmail,
-        String applicantBio,
-        String githubUrl,
-        String gitlabUrl,
-        List<TechnologyResponse> technologies
-) {}
+        ApplicantInfo applicant,
+        String message,
+        String status,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
+) {
+    public record ApplicantInfo(
+            Long id,
+            String name,
+            String email,
+            List<String> stack,
+            String avatar,
+            String bio,
+            String githubUrl,
+            String gitlabUrl
+    ) {}
+}
