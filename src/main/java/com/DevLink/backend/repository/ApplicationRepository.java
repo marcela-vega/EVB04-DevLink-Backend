@@ -11,6 +11,8 @@ import java.util.Optional;
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
     boolean existsByProjectIdAndApplicantId(Long projectId, Long applicantId);
 
+    boolean existsByProjectIdAndApplicantIdAndStatusNot(Long projectId, Long applicantId, ApplicationStatus status);
+
     @EntityGraph(attributePaths = {"project", "project.creator", "project.technologies"})
     List<Application> findByApplicantIdAndStatus(Long applicantId, ApplicationStatus status);
 

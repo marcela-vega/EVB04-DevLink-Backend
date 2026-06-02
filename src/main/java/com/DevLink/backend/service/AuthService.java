@@ -65,6 +65,8 @@ public class AuthService {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.email(), request.password())
             );
+        } catch (org.springframework.security.authentication.DisabledException ex) {
+            throw new UnauthorizedException("Cuenta inhabilitada por violación de normas comunitarias. Contacte al administrador.");
         } catch (org.springframework.security.core.AuthenticationException ex) {
             throw new UnauthorizedException("Correo o contraseña incorrectos");
         }
