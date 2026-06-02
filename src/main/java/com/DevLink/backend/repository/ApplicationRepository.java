@@ -11,6 +11,9 @@ import java.util.Optional;
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
     boolean existsByProjectIdAndApplicantId(Long projectId, Long applicantId);
 
+    @EntityGraph(attributePaths = {"project", "project.creator", "project.technologies"})
+    List<Application> findByApplicantIdAndStatus(Long applicantId, ApplicationStatus status);
+
     @EntityGraph(attributePaths = {"applicant", "applicant.technologies"})
     List<Application> findByProjectIdOrderByAppliedAtDesc(Long projectId);
 
@@ -19,4 +22,9 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     long countByApplicantIdAndStatus(Long applicantId, ApplicationStatus status);
 
     long countByProjectId(Long projectId);
+
+    boolean existsByProjectIdAndStatus(Long projectId, ApplicationStatus status);
+
+    @EntityGraph(attributePaths = {"applicant", "applicant.technologies"})
+    List<Application> findByProjectIdAndStatusOrderByAppliedAtAsc(Long projectId, ApplicationStatus status);
 }

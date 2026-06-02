@@ -74,6 +74,22 @@ public class MapperService {
 
         long applicationCount = applicationRepository.countByProjectId(project.getId());
 
+        List<ProjectResponse.CollaboratorInfo> collaborators =
+                applicationRepository.findByProjectIdAndStatusOrderByAppliedAtAsc(project.getId(), ApplicationStatus.ACCEPTED)
+                        .stream()
+                        .map(app -> new ProjectResponse.CollaboratorInfo(
+                                app.getApplicant().getId(),
+                                app.getApplicant().getFullName(),
+                                null))
+                        .toList();
+
+        Long currentUserApplicationId = currentUserId != null
+                ? applicationRepository.findByProjectIdAndApplicantId(project.getId(), currentUserId)
+                        .filter(app -> app.getStatus() == ApplicationStatus.PENDING)
+                        .map(Application::getId)
+                        .orElse(null)
+                : null;
+
         return new ProjectResponse(
                 project.getId(),
                 project.getTitle(),
@@ -82,13 +98,14 @@ public class MapperService {
                 toProjectStatus(project.getStatus()),
                 creator.getId(),
                 creatorInfo,
-                List.of(),
+                collaborators,
                 project.getCreatedAt(),
                 project.getUpdatedAt(),
                 null,
                 null,
                 applicationCount,
-                canApply
+                canApply,
+                currentUserApplicationId
         );
     }
 
@@ -113,7 +130,7 @@ public class MapperService {
                 application.getProject().getId(),
                 applicant.getId(),
                 applicantInfo,
-                null,
+                application.getMessage(),
                 toApplicationStatus(application.getStatus()),
                 application.getAppliedAt(),
                 application.getAppliedAt()

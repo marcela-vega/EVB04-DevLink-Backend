@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -120,13 +122,30 @@ public class ProjectService {
     @Transactional(readOnly = true)
     public Page<ProjectResponse> listMyProjects(String email, Pageable pageable) {
         User currentUser = userService.getCurrentUserEntity(email);
-        Page<Project> projectsPage = projectRepository.findByCreatorIdAndStatusOrderByCreatedAtDesc(
-                currentUser.getId(), ProjectStatus.LOOKING_FOR_COLLABORATORS, pageable);
+        List<ProjectStatus> activeStatuses = List.of(
+                ProjectStatus.LOOKING_FOR_COLLABORATORS,
+                ProjectStatus.IN_DEVELOPMENT,
+                ProjectStatus.COMPLETED);
+        Page<Project> projectsPage = projectRepository.findByCreatorIdAndStatusInOrderByCreatedAtDesc(
+                currentUser.getId(), activeStatuses, pageable);
         return projectsPage.map(project -> mapperService.toProjectResponse(
                 project,
                 currentUser.getId(),
                 applicationRepository.existsByProjectIdAndApplicantId(project.getId(), currentUser.getId())
         ));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProjectResponse> listCollaboratingProjects(String email) {
+        User currentUser = userService.getCurrentUserEntity(email);
+        return applicationRepository.findByApplicantIdAndStatus(currentUser.getId(), ApplicationStatus.ACCEPTED)
+                .stream()
+                .map(app -> {
+                    Project project = app.getProject();
+                    boolean hasApplied = applicationRepository.existsByProjectIdAndApplicantId(project.getId(), currentUser.getId());
+                    return mapperService.toProjectResponse(project, currentUser.getId(), hasApplied);
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -159,7 +178,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public ApiMessageResponse applyToProject(Long projectId, String email) {
+    public ApiMessageResponse applyToProject(Long projectId, String email, String message) {
         User applicant = userService.getCurrentUserEntity(email);
         Project project = getProjectEntity(projectId);
 
@@ -176,6 +195,7 @@ public class ProjectService {
         Application application = Application.builder()
                 .project(project)
                 .applicant(applicant)
+                .message(message != null && !message.isBlank() ? message.trim() : null)
                 .build();
         applicationRepository.save(application);
 
@@ -296,8 +316,19 @@ public class ProjectService {
             throw new BadRequestException("Only projects looking for collaborators can start development");
         }
 
+        if (!applicationRepository.existsByProjectIdAndStatus(projectId, ApplicationStatus.ACCEPTED)) {
+            throw new BadRequestException("You must accept at least one collaborator before starting development");
+        }
+
         project.setStatus(ProjectStatus.IN_DEVELOPMENT);
         Project saved = projectRepository.save(project);
+
+        applicationRepository.findByProjectIdAndStatusOrderByAppliedAtAsc(projectId, ApplicationStatus.ACCEPTED)
+                .forEach(app -> notificationService.create(app.getApplicant(),
+                        "Development started",
+                        "The project '" + saved.getTitle() + "' has entered the development phase. Welcome to the team!",
+                        NotificationType.PROJECT_PUBLISHED));
+
         return mapperService.toProjectResponse(saved, currentUser.getId(), false);
     }
 

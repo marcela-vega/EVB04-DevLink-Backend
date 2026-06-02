@@ -9,5 +9,6 @@ import java.util.List;
 public record CreateDiscussionRequest(
         @NotBlank @Size(max = 150) String title,
         @NotBlank @Size(max = 10000) String content,
-        @NotEmpty List<Integer> technologyIds
+        @NotEmpty List<Integer> technologyIds,
+        Long projectId
 ) {}

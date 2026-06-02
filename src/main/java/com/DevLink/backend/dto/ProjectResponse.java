@@ -17,7 +17,8 @@ public record ProjectResponse(
         String startedAt,
         String completedAt,
         long applicationCount,
-        boolean canApply
+        boolean canApply,
+        Long currentUserApplicationId
 ) {
     public record CreatorInfo(Long id, String name, String avatar) {}
     public record CollaboratorInfo(Long id, String name, String avatar) {}
