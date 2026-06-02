@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/discussions", "/api/discussions/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/discussions/*/comments").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/statistics").permitAll()
+                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "MODERATOR")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
