@@ -32,4 +32,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
             @Param("technologyIds") List<Integer> technologyIds,
             @Param("technologyCount") long technologyCount
     );
+
+    long countByCreatorIdAndStatusNot(Long creatorId, ProjectStatus status);
 }

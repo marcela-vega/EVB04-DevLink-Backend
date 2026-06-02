@@ -2,6 +2,7 @@ package com.DevLink.backend.service;
 
 import com.DevLink.backend.dto.*;
 import com.DevLink.backend.entity.*;
+import com.DevLink.backend.entity.enums.ProjectStatus;
 import com.DevLink.backend.repository.ApplicationRepository;
 import com.DevLink.backend.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,8 @@ public class MapperService {
                 .map(t -> String.valueOf(t.getId()))
                 .toList();
 
-        int projectsCount = projectRepository.countByCreatorId(user.getId());
+        long projectsCount = projectRepository.countByCreatorIdAndStatusNot(
+                user.getId(), ProjectStatus.DRAFT);
         int collaborationsCount = applicationRepository.countByApplicantIdAndStatus(
                 user.getId(), com.DevLink.backend.entity.enums.ApplicationStatus.ACCEPTED);
 

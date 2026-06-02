@@ -13,7 +13,7 @@ public record UserProfileResponse(
         String bio,
         String avatar,
         LocalDateTime createdAt,
-        int projectsCount,
+        long projectsCount,
         int collaborationsCount,
         String githubUrl,
         String gitlabUrl
