@@ -34,14 +34,16 @@ public class AdminService {
         Role role = roleRepository.findByName(roleName.toUpperCase())
                 .orElseThrow(() -> new NotFoundException("Role not found: " + roleName));
         user.setRoles(Set.of(role));
-        return mapperService.toUserProfileResponse(userRepository.save(user));
+        userRepository.save(user);
+        return mapperService.toUserProfileResponse(getUser(userId));
     }
 
     @Transactional
     public UserProfileResponse setUserActive(Long userId, boolean active) {
         User user = getUser(userId);
         user.setActive(active);
-        return mapperService.toUserProfileResponse(userRepository.save(user));
+        userRepository.save(user);
+        return mapperService.toUserProfileResponse(getUser(userId));
     }
 
     private User getUser(Long userId) {
