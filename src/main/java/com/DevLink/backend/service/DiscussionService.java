@@ -2,12 +2,15 @@ package com.DevLink.backend.service;
 
 import com.DevLink.backend.dto.*;
 import com.DevLink.backend.entity.Discussion;
+import com.DevLink.backend.entity.Project;
 import com.DevLink.backend.entity.User;
 import com.DevLink.backend.entity.enums.NotificationType;
+import com.DevLink.backend.exception.BadRequestException;
 import com.DevLink.backend.exception.NotFoundException;
 import com.DevLink.backend.exception.UnauthorizedException;
 import com.DevLink.backend.repository.CommentRepository;
 import com.DevLink.backend.repository.DiscussionRepository;
+import com.DevLink.backend.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +26,7 @@ import java.util.List;
 public class DiscussionService {
     private final DiscussionRepository discussionRepository;
     private final CommentRepository commentRepository;
+    private final ProjectRepository projectRepository;
     private final UserService userService;
     private final TechnologyService technologyService;
     private final MapperService mapperService;
@@ -30,9 +34,15 @@ public class DiscussionService {
 
     @Transactional
     public DiscussionResponse create(String email, CreateDiscussionRequest request) {
+        if (request.projectId() == null) {
+            throw new BadRequestException("projectId is required");
+        }
         User author = userService.getCurrentUserEntity(email);
+        Project project = projectRepository.findById(request.projectId())
+                .orElseThrow(() -> new NotFoundException("Project not found"));
         Discussion discussion = Discussion.builder()
                 .author(author)
+                .project(project)
                 .title(request.title().trim())
                 .content(request.content().trim())
                 .technologies(new HashSet<>(technologyService.getTechnologiesByIds(request.technologyIds())))
@@ -71,6 +81,12 @@ public class DiscussionService {
         Discussion discussion = getDiscussionEntity(discussionId);
         int commentCount = (int) commentRepository.countByDiscussionId(discussionId);
         return mapperService.toDiscussionResponse(discussion, commentCount);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<DiscussionResponse> listByProject(Long projectId, Pageable pageable) {
+        Page<Discussion> page = discussionRepository.findByProjectIdOrderByCreatedAtDesc(projectId, pageable);
+        return page.map(d -> mapperService.toDiscussionResponse(d, (int) commentRepository.countByDiscussionId(d.getId())));
     }
 
     @Transactional(readOnly = true)

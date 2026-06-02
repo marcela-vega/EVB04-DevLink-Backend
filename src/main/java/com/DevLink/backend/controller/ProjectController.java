@@ -58,6 +58,11 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.listMyProjects(authentication.getName(), pageable));
     }
 
+    @GetMapping("/my/collaborating")
+    public ResponseEntity<List<ProjectResponse>> listCollaborating(Authentication authentication) {
+        return ResponseEntity.ok(projectService.listCollaboratingProjects(authentication.getName()));
+    }
+
     @GetMapping("/my/drafts")
     public ResponseEntity<Page<ProjectResponse>> listMyDrafts(@RequestParam(defaultValue = "0") int page,
                                                                @RequestParam(defaultValue = "20") int size,
@@ -73,9 +78,12 @@ public class ProjectController {
     }
 
     @PostMapping("/{id:[0-9]+}/apply")
-    public ResponseEntity<ApiMessageResponse> apply(@PathVariable Long id, Authentication authentication) {
+    public ResponseEntity<ApiMessageResponse> apply(@PathVariable Long id,
+                                                    Authentication authentication,
+                                                    @Valid @RequestBody(required = false) ApplyToProjectRequest request) {
+        String message = request != null ? request.message() : null;
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(projectService.applyToProject(id, authentication.getName()));
+                .body(projectService.applyToProject(id, authentication.getName(), message));
     }
 
     @GetMapping("/{id:[0-9]+}/applications")

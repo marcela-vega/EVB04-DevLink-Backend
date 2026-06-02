@@ -26,6 +26,9 @@ public class Application {
     @Column(nullable = false, length = 50)
     private ApplicationStatus status;
 
+    @Column(columnDefinition = "TEXT")
+    private String message;
+
     @Column(name = "applied_at", nullable = false)
     private LocalDateTime appliedAt;
 

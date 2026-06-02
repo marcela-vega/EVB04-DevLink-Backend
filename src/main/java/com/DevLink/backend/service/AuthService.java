@@ -5,6 +5,7 @@ import com.DevLink.backend.entity.Role;
 import com.DevLink.backend.entity.User;
 import com.DevLink.backend.exception.BadRequestException;
 import com.DevLink.backend.exception.NotFoundException;
+import com.DevLink.backend.exception.UnauthorizedException;
 import com.DevLink.backend.repository.RoleRepository;
 import com.DevLink.backend.repository.UserRepository;
 import com.DevLink.backend.security.JwtService;
@@ -60,9 +61,13 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password())
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.email(), request.password())
+            );
+        } catch (org.springframework.security.core.AuthenticationException ex) {
+            throw new UnauthorizedException("Correo o contraseña incorrectos");
+        }
 
         User user = userRepository.findByEmailIgnoreCase(request.email())
                 .orElseThrow(() -> new NotFoundException("User not found"));

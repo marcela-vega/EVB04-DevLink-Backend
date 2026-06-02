@@ -36,6 +36,14 @@ public class DiscussionController {
         return ResponseEntity.ok(discussionService.listAll(technologyIds, pageable));
     }
 
+    @GetMapping("/by-project/{projectId}")
+    public ResponseEntity<Page<DiscussionResponse>> listByProject(@PathVariable Long projectId,
+                                                                   @RequestParam(defaultValue = "0") int page,
+                                                                   @RequestParam(defaultValue = "50") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(discussionService.listByProject(projectId, pageable));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<DiscussionResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(discussionService.getById(id));

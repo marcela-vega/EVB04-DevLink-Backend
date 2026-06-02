@@ -19,6 +19,9 @@ public interface DiscussionRepository extends JpaRepository<Discussion, Long> {
     @EntityGraph(attributePaths = {"author", "technologies"})
     Page<Discussion> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
+    @EntityGraph(attributePaths = {"author", "technologies"})
+    Page<Discussion> findByProjectIdOrderByCreatedAtDesc(Long projectId, Pageable pageable);
+
     @Query(value = """
             SELECT dt.discussion_id
             FROM discussion_technologies dt

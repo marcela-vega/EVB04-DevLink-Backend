@@ -61,6 +61,7 @@ CREATE TABLE applications (
     project_id BIGINT NOT NULL,
     applicant_id BIGINT NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
+    message TEXT,
     applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_applications_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
     CONSTRAINT fk_applications_applicant FOREIGN KEY (applicant_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -88,11 +89,13 @@ ON CONFLICT (name) DO NOTHING;
 CREATE TABLE discussions (
     id BIGSERIAL PRIMARY KEY,
     author_id BIGINT NOT NULL,
+    project_id BIGINT NOT NULL,
     title VARCHAR(150) NOT NULL,
     content TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_discussions_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT fk_discussions_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_discussions_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
 
 CREATE TABLE discussion_technologies (
@@ -137,3 +140,37 @@ INSERT INTO technologies (name) VALUES
 ('JavaScript'), ('TypeScript'), ('React'), ('Angular'),
 ('Python'), ('C#'), ('.NET'), ('Node.js'), ('HTML'), ('CSS'), ('SQL'), ('Git')
 ON CONFLICT (name) DO NOTHING;
+
+CREATE TABLE security_questions (
+    id SERIAL PRIMARY KEY,
+    question VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE user_security_answers (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    question_id INT NOT NULL,
+    answer_hash VARCHAR(255) NOT NULL,
+    CONSTRAINT fk_usa_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_usa_question FOREIGN KEY (question_id) REFERENCES security_questions(id) ON DELETE CASCADE,
+    CONSTRAINT uq_user_question UNIQUE (user_id, question_id)
+);
+
+CREATE TABLE password_reset_tokens (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    token VARCHAR(64) NOT NULL UNIQUE,
+    expires_at TIMESTAMP NOT NULL,
+    used BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT fk_prt_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_password_reset_tokens_token ON password_reset_tokens(token);
+
+INSERT INTO security_questions (question) VALUES
+('¿Cuál es el nombre de tu primera mascota?'),
+('¿En qué ciudad naciste?'),
+('¿Cuál es el nombre de tu mejor amigo de la infancia?'),
+('¿Cuál fue el nombre de tu primera escuela?'),
+('¿Cuál es el segundo nombre de tu madre?')
+ON CONFLICT DO NOTHING;

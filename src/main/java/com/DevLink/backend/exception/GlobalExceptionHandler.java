@@ -1,5 +1,6 @@
 package com.DevLink.backend.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -44,9 +45,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(body);
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        String msg = ex.getMessage() != null && ex.getMessage().contains("duplicate key")
+                ? "Ya existe un registro con esos datos. Verifica que no estés usando valores duplicados."
+                : "No se pudo completar la operación por un conflicto de datos.";
+        return build(HttpStatus.CONFLICT, msg);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
-        return build(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "Ocurrió un error inesperado.");
     }
 
     private ResponseEntity<Map<String, Object>> build(HttpStatus status, String message) {
