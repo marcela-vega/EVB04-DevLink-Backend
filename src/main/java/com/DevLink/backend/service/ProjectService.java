@@ -115,7 +115,7 @@ public class ProjectService {
         return projectsPage.map(project -> mapperService.toProjectResponse(
                 project,
                 finalCurrentUserId,
-                finalCurrentUserId != null && applicationRepository.existsByProjectIdAndApplicantId(project.getId(), finalCurrentUserId)
+                finalCurrentUserId != null && applicationRepository.existsByProjectIdAndApplicantIdAndStatusNot(project.getId(), finalCurrentUserId, ApplicationStatus.WITHDRAWN)
         ));
     }
 
@@ -131,7 +131,7 @@ public class ProjectService {
         return projectsPage.map(project -> mapperService.toProjectResponse(
                 project,
                 currentUser.getId(),
-                applicationRepository.existsByProjectIdAndApplicantId(project.getId(), currentUser.getId())
+                applicationRepository.existsByProjectIdAndApplicantIdAndStatusNot(project.getId(), currentUser.getId(), ApplicationStatus.WITHDRAWN)
         ));
     }
 
@@ -142,7 +142,7 @@ public class ProjectService {
                 .stream()
                 .map(app -> {
                     Project project = app.getProject();
-                    boolean hasApplied = applicationRepository.existsByProjectIdAndApplicantId(project.getId(), currentUser.getId());
+                    boolean hasApplied = applicationRepository.existsByProjectIdAndApplicantIdAndStatusNot(project.getId(), currentUser.getId(), ApplicationStatus.WITHDRAWN);
                     return mapperService.toProjectResponse(project, currentUser.getId(), hasApplied);
                 })
                 .collect(Collectors.toList());
@@ -173,7 +173,7 @@ public class ProjectService {
             throw new UnauthorizedException("Draft projects are private and visible only to the creator");
         }
 
-        boolean hasApplied = currentUserId != null && applicationRepository.existsByProjectIdAndApplicantId(projectId, currentUserId);
+        boolean hasApplied = currentUserId != null && applicationRepository.existsByProjectIdAndApplicantIdAndStatusNot(projectId, currentUserId, ApplicationStatus.WITHDRAWN);
         return mapperService.toProjectResponse(project, currentUserId, hasApplied);
     }
 
@@ -188,7 +188,7 @@ public class ProjectService {
         if (project.getCreator().getId().equals(applicant.getId())) {
             throw new BadRequestException("You cannot apply to your own project");
         }
-        if (applicationRepository.existsByProjectIdAndApplicantId(projectId, applicant.getId())) {
+        if (applicationRepository.existsByProjectIdAndApplicantIdAndStatusNot(projectId, applicant.getId(), ApplicationStatus.WITHDRAWN)) {
             throw new BadRequestException("You have already applied to this project");
         }
 
