@@ -36,6 +36,7 @@ public class SecurityConfig {
                                 "/api/auth/forgot-password/**",
                                 "/api/technologies/**",
                                 "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/technologies/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/projects", "/api/projects/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/discussions", "/api/discussions/*").permitAll()
