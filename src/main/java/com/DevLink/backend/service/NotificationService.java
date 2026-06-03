@@ -9,6 +9,7 @@ import com.DevLink.backend.exception.UnauthorizedException;
 import com.DevLink.backend.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,24 +19,30 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final MapperService mapperService;
+    private final SimpMessagingTemplate messagingTemplate;
 
+    // Compatibilidad: las llamadas existentes (4 args) siguen funcionando
     @Transactional
     public void create(User user, String title, String message, NotificationType type) {
+        create(user, title, message, type, null);
+    }
+
+    @Transactional
+    public void create(User user, String title, String message, NotificationType type, String link) {
         Notification notification = Notification.builder()
                 .user(user)
                 .title(title)
                 .message(message)
                 .type(type)
+                .link(link)
                 .build();
-        notificationRepository.save(notification);
-    }
+        Notification saved = notificationRepository.save(notification);
 
-    @Transactional(readOnly = true)
-    public List<NotificationResponse> getForUser(Long userId) {
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId)
-                .stream()
-                .map(mapperService::toNotificationResponse)
-                .toList();
+        // Empuje en tiempo real al destinatario (mismo /ws + Principal = email)
+        messagingTemplate.convertAndSendToUser(
+                user.getEmail(),
+                "/queue/notifications",
+                mapperService.toNotificationResponse(saved));
     }
 
     @Transactional
@@ -47,5 +54,13 @@ public class NotificationService {
         }
         notification.setIsRead(true);
         notificationRepository.save(notification);
+    }
+
+    @Transactional(readOnly = true)
+    public List<NotificationResponse> getForUser(Long userId) {
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(mapperService::toNotificationResponse)
+                .toList();
     }
 }

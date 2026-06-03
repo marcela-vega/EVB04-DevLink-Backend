@@ -162,12 +162,12 @@ public class MapperService {
                 notification.getTitle(),
                 notification.getMessage(),
                 Boolean.TRUE.equals(notification.getIsRead()),
-                null,
+                notification.getLink(),
                 notification.getCreatedAt()
         );
     }
 
-    public List<TechnologyResponse> toTechnologyResponses(List<Technology> technologies) {
+        public List<TechnologyResponse> toTechnologyResponses(List<Technology> technologies) {
         return technologies.stream().map(this::toTechnologyResponse).toList();
     }
 
