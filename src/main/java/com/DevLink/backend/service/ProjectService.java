@@ -202,7 +202,8 @@ public class ProjectService {
         notificationService.create(project.getCreator(),
                 "New application received",
                 applicant.getFullName() + " applied to your project '" + project.getTitle() + "'.",
-                NotificationType.APPLICATION_RECEIVED);
+                NotificationType.APPLICATION_RECEIVED,
+                "/dashboard/projects/" + project.getId() + "?tab=applications");
 
         return new ApiMessageResponse("Application sent successfully");
     }
